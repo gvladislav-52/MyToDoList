@@ -9,8 +9,8 @@
 
 import UIKit
 
-class ViewController: UITableViewController, ToDoCellDelegate {
-
+class ViewController: UITableViewController, ToDoCellDelegate, CreateTodoControllerDelegate{
+    
     var todoItems = [ToDoItem]() {
         didSet {
             tableView.reloadData()
@@ -66,10 +66,22 @@ class ViewController: UITableViewController, ToDoCellDelegate {
         createNewButton.alpha = 1
     }
 
+//    @objc func createNewTodo() {
+//        let vc = CreateTodoController()
+//        present(vc, animated: true, completion: nil)
+//    }
+    
     @objc func createNewTodo() {
-        let vc = CreateTodoController()
-        present(vc, animated: true, completion: nil)
-    }
+           let createTodoVC = CreateTodoController()
+           createTodoVC.delegate = self  // Set the delegate
+           present(createTodoVC, animated: true, completion: nil)
+       }
+
+       // MARK: - CreateTodoControllerDelegate
+
+       func didCreateNewTodo() {
+           fetchItems()  // Refresh the list
+       }
 
     @objc func handleRefresh() {
         fetchItems()

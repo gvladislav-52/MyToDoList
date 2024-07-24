@@ -7,7 +7,13 @@
 
 import UIKit
 
+protocol CreateTodoControllerDelegate: AnyObject {
+    func didCreateNewTodo()
+}
+
 class CreateTodoController: UIViewController {
+    
+    weak var delegate: CreateTodoControllerDelegate?
     
     private let titleLabel: UILabel = {
         let label = UILabel()
@@ -42,12 +48,17 @@ class CreateTodoController: UIViewController {
     }()
     
     @objc func createItemPressed() {
-        guard let todoText = itemTextField.text else { return }
-        PostService.shared.uploadTodoItem(text: todoText) { (error, ref) in
-            self.itemTextField.text = ""
-            self.dismiss(animated: true, completion: nil)
+            guard let todoText = itemTextField.text, !todoText.isEmpty else { return }
+            PostService.shared.uploadTodoItem(text: todoText) { [weak self] (error, ref) in
+                if let error = error {
+                    print("Failed to create item:", error.localizedDescription)
+                    return
+                }
+                self?.itemTextField.text = ""
+                self?.delegate?.didCreateNewTodo()  // Notify the delegate
+                self?.dismiss(animated: true, completion: nil)
+            }
         }
-    }
     
     override func viewDidLoad() {
         configureUI()
