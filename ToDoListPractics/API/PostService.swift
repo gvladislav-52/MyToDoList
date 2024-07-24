@@ -27,9 +27,7 @@ struct PostService {
     let DB_REF = Database.database().reference()
     
     func fetchAllItems(completion: @escaping([ToDoItem]) -> Void)  {
-        
-    var allItems = [ToDoItem]()
-    
+        var allItems = [ToDoItem]()
         DB_REF.child("items").queryOrdered(byChild: "isComplete").observe(.childAdded) { (snapshot) in
             fetchSingleItem(id: snapshot.key) { (item) in
                 allItems.append(item)
@@ -58,11 +56,16 @@ struct PostService {
     
     func updateItemStatus(todoItem: String, isComplete: Bool, completetion: @escaping(Error?, DatabaseReference)->Void) {
         let value = ["isComplete": isComplete]
-        
         DB_REF.child("items").child(todoItem).updateChildValues(value, withCompletionBlock: completetion)
     }
     
     func deleteAllItems(completion: @escaping(Error?, DatabaseReference) -> Void) {
-            DB_REF.child("items").removeValue(completionBlock: completion)
-        }
+        DB_REF.child("items").removeValue(completionBlock: completion)
+    }
+
+    // New function to delete a specific item by its ID
+    func deleteItem(by id: String, completion: @escaping (Error?, DatabaseReference) -> Void) {
+        DB_REF.child("items").child(id).removeValue(completionBlock: completion)
+    }
 }
+

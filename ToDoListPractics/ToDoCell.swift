@@ -5,23 +5,31 @@
 //  Created by gvladislav-52 on 23.07.2024.
 //
 
+// ToDoCell.swift
+
 import UIKit
+
+protocol ToDoCellDelegate: AnyObject {
+    func didTapTrash(for cell: ToDoCell)
+}
 
 class ToDoCell: UITableViewCell {
     
-    var todoItem: ToDoItem? {
-            didSet {
-                titleLabel.text = todoItem?.title
+    weak var delegate: ToDoCellDelegate?
     
-                if let isComplete = todoItem?.isComplete, isComplete {
-                    statusLabel.text = "Status: Complete"
-                    statusLabel.textColor = UIColor(red: 96/255, green: 108/255, blue: 56/255, alpha: 1.0)
-                } else {
-                    statusLabel.text = "Status: Incomplete"
-                    statusLabel.textColor = UIColor(red: 208/255, green: 0/255, blue: 0/255, alpha: 1.0)
-                }
+    var todoItem: ToDoItem? {
+        didSet {
+            titleLabel.text = todoItem?.title
+            
+            if let isComplete = todoItem?.isComplete, isComplete {
+                statusLabel.text = "Status: Complete"
+                statusLabel.textColor = UIColor(red: 96/255, green: 108/255, blue: 56/255, alpha: 1.0)
+            } else {
+                statusLabel.text = "Status: Incomplete"
+                statusLabel.textColor = UIColor(red: 208/255, green: 0/255, blue: 0/255, alpha: 1.0)
             }
         }
+    }
     
     private let titleLabel: UILabel = {
         let label = UILabel()
@@ -39,16 +47,16 @@ class ToDoCell: UITableViewCell {
         return label
     }()
     
-        private let trashImageView: UIImageView = {
-            let imageView = UIImageView()
-            imageView.image = UIImage(systemName: "trash")
-            imageView.tintColor = .red
-            imageView.contentMode = .scaleAspectFit
-            imageView.isUserInteractionEnabled = true // Enable interaction
-            return imageView
-        }()
+    private let trashImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.image = UIImage(systemName: "trash")
+        imageView.tintColor = .red
+        imageView.contentMode = .scaleAspectFit
+        imageView.isUserInteractionEnabled = true
+        return imageView
+    }()
     
-    override init (style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
         backgroundColor = UIColor(red: 252/255, green: 163/255, blue: 17/255, alpha: 1.0)
@@ -61,23 +69,24 @@ class ToDoCell: UITableViewCell {
         titleLabel.anchor(top: topAnchor, left: leftAnchor, paddingTop: 4, paddingLeft: 8)
         statusLabel.anchor(top: titleLabel.bottomAnchor, left: leftAnchor, paddingTop: 4, paddingLeft: 8)
         
-                // Set constraints for trashImageView
-                trashImageView.translatesAutoresizingMaskIntoConstraints = false
-                NSLayoutConstraint.activate([
-                    trashImageView.centerYAnchor.constraint(equalTo: centerYAnchor),
-                    trashImageView.rightAnchor.constraint(equalTo: rightAnchor, constant: -16),
-                    trashImageView.widthAnchor.constraint(equalToConstant: 24),
-                    trashImageView.heightAnchor.constraint(equalToConstant: 24)
-                ])
+        // Set constraints for trashImageView
+        trashImageView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            trashImageView.centerYAnchor.constraint(equalTo: centerYAnchor),
+            trashImageView.rightAnchor.constraint(equalTo: rightAnchor, constant: -16),
+            trashImageView.widthAnchor.constraint(equalToConstant: 24),
+            trashImageView.heightAnchor.constraint(equalToConstant: 24)
+        ])
         
-                // Add tap gesture recognizer to trashImageView
-                let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTapTrash))
-                trashImageView.addGestureRecognizer(tapGesture)
+        // Add tap gesture recognizer to trashImageView
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTapTrash))
+        trashImageView.addGestureRecognizer(tapGesture)
     }
     
     @objc private func didTapTrash() {
-        // Implement the deletion action or delegate callback here
-        print("Trash icon tapped")
+        if let delegate = delegate {
+            delegate.didTapTrash(for: self)
+        }
     }
     
     required init?(coder: NSCoder) {

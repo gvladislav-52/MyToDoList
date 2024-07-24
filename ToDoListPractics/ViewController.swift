@@ -5,9 +5,11 @@
 //  Created by gvladislav-52 on 23.07.2024.
 //
 
+// ViewController.swift
+
 import UIKit
 
-class ViewController: UITableViewController {
+class ViewController: UITableViewController, ToDoCellDelegate {
 
     var todoItems = [ToDoItem]() {
         didSet {
@@ -27,7 +29,6 @@ class ViewController: UITableViewController {
             .foregroundColor: UIColor.white
         ]
 
-        // Adding a delete all button for demonstration
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Delete All", style: .plain, target: self, action: #selector(deleteAllTodos))
     }
 
@@ -79,8 +80,6 @@ class ViewController: UITableViewController {
         }
     }
 
-    // MARK: - Delete All Items
-
     @objc func deleteAllTodos() {
         PostService.shared.deleteAllItems { [weak self] (error, reference) in
             if let error = error {
@@ -92,7 +91,24 @@ class ViewController: UITableViewController {
         fetchItems()
     }
 
-    // MARK: - UITableViewDelegate/UITableViewDataSource
+    // MARK: - ToDoCellDelegate
+
+    func didTapTrash(for cell: ToDoCell) {
+        guard let indexPath = tableView.indexPath(for: cell) else { return }
+        let todoItem = todoItems[indexPath.row]
+        
+        // Remove from database
+        PostService.shared.deleteItem(by: todoItem.id) { [weak self] error, _ in
+            if let error = error {
+                print("Failed to delete item:", error.localizedDescription)
+                return
+            }
+
+            // Remove from local data source
+            self?.todoItems.remove(at: indexPath.row)
+            self?.fetchItems()
+        }
+    }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return todoItems.count
@@ -101,6 +117,7 @@ class ViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifer, for: indexPath) as? ToDoCell else { return UITableViewCell() }
         cell.todoItem = todoItems[indexPath.row]
+        cell.delegate = self  // Set the delegate
         return cell
     }
 
