@@ -61,4 +61,8 @@ struct PostService {
         
         DB_REF.child("items").child(todoItem).updateChildValues(value, withCompletionBlock: completetion)
     }
+    
+    func deleteAllItems(completion: @escaping(Error?, DatabaseReference) -> Void) {
+            DB_REF.child("items").removeValue(completionBlock: completion)
+        }
 }
