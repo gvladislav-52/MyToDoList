@@ -25,20 +25,28 @@ class CreateTodoController: UIViewController {
         button.backgroundColor = .systemGreen
         button.layer.cornerRadius = 10
         button.titleLabel?.font = .boldSystemFont(ofSize: 24)
+        
         button.addTarget(self, action: #selector(createItemPressed), for: .touchUpInside)
         return button
     }()
     
     private let itemTextField: UITextField = {
-        let tf = UITextField()
+        let tf = TextField()
         tf.font = .systemFont(ofSize: 24)
         tf.backgroundColor = .white
         tf.textColor = .black
+        tf.layer.cornerRadius = 10
+        tf.placeholder = "Enter a new task..."
+        tf.tintColor = .systemGreen
         return tf
     }()
     
     @objc func createItemPressed() {
-        print(itemTextField.text)
+        guard let todoText = itemTextField.text else { return }
+        PostService.shared.uploadTodoItem(text: todoText) { (error, ref) in
+            self.itemTextField.text = ""
+            self.dismiss(animated: true, completion: nil)
+        }
     }
     
     override func viewDidLoad() {
@@ -66,5 +74,21 @@ extension CreateTodoController: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
         return true
+    }
+}
+
+class TextField: UITextField {
+    let padding = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 8)
+    
+    override func textRect(forBounds bounds: CGRect) -> CGRect {
+        return bounds.inset(by: padding)
+    }
+    
+    override func placeholderRect(forBounds bounds: CGRect) -> CGRect {
+        return bounds.inset(by: padding)
+    }
+    
+    override func editingRect(forBounds bounds: CGRect) -> CGRect {
+        return bounds.inset(by: padding)
     }
 }
