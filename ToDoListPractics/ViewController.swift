@@ -9,10 +9,22 @@ import UIKit
 
 class ViewController: UITableViewController {
     
+    var todoItems = [ToDoItem]() {
+        didSet {
+            print("todo items was set")
+            tableView.reloadData()
+        }
+    }
+    
     let reuseIdentifer = "TodoCell"
     override func viewDidLoad() {
         super.viewDidLoad()
         configureTableView()
+        
+        PostService.shared.fetchAllItems { (allitems) in
+            self.todoItems = allitems
+        }
+        
         title = "ToDoList"
     }
     
@@ -54,11 +66,13 @@ class ViewController: UITableViewController {
     // MARK: - UITableViewDelegate/UITableViewDataSource
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 51
+        return todoItems.count
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifer, for: indexPath) as? ToDoCell else {return UITableViewCell()}
+        
+        cell.todoItem = todoItems[indexPath.row]
         return cell
     }
     
